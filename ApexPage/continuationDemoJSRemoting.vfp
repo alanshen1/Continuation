@@ -1,0 +1,116 @@
+<apex:page controller="ContinuationDemoJSRemoting" standardStylesheets="false" sidebar="false" showHeader="false"
+    title="Continuation Server Demo">
+    <!-- <apex:slds /> Images (loading image) are not imported using this tag -->
+    <apex:stylesheet
+        value="{!URLFOR($Resource.SLDS2_3_1, 'assets/styles/salesforce-lightning-design-system.min.css')}" />
+
+    <div aria-hidden="true" style="width:100%;height:100%">
+        <div class="slds slds-box slds-scope">
+            <div class=" slds-m-top_xx-large slds-m-bottom_small">
+                Total API calls to make : <input type="text" value="3" placeholder="Total API calls to make, Default 3"
+                    id="txtAPICallsToMake" />
+                <input value="Start Request" type="button" onclick="startRequest()" />
+            </div>
+            <br /> <br />
+
+            <div>
+                Note : With increase in each API count, Response time would also be increased. <br />
+                <b>Responses :</b> <span id="resultContainer"></span>
+            </div>
+
+            <div id="modalWindowMsg" style="height:640px;" class="hide">
+                <section role="dialog" tabindex="-1" aria-labelledby="modal-heading-01" aria-describedby="modal-content"
+                    class="slds-modal slds-fade-in-open">
+                    <div class="slds-modal__container">
+                        <header class="slds-modal__header">
+                            <h2 id="modal-heading-01" class="slds-text-heading_medium slds-hyphenate">API Callout status
+                            </h2>
+                        </header>
+                        <div class="slds-modal__content slds-p-around_medium" id="modal-content">
+                            <p>
+                                <span id="modal-content-status"></span>
+                            </p>
+                            <p>
+                            <div class="demo-only" style="height:3rem;">
+                                <div role="status" class="slds-spinner slds-spinner_medium">
+                                    <span class="slds-assistive-text">Loading</span>
+                                    <div class="slds-spinner__dot-a"></div>
+                                    <div class="slds-spinner__dot-b"></div>
+                                </div>
+                            </div>
+                            </p>
+                        </div>
+                        <footer class="slds-modal__footer">
+                            <button class="slds-button slds-button_neutral" onclick="cancelModal()">Cancel</button>
+                        </footer>
+                    </div>
+                </section>
+                <div id="modalWindowOverlay" class="slds-backdrop slds-backdrop_open"></div>
+            </div>
+        </div>
+    </div>
+    <style>
+        .modal {
+            visibility: visible !important;
+            opacity: 1 !important;
+            transition: opacity 0.4s linear;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        #modal-content {
+            padding: 1rem;
+        }
+    </style>
+    <script type="text/javascript">
+        Visualforce.remoting.timeout = 120000;
+        var apiNumber = 1;
+        var totalAPICallsToMake = 3;
+        var resultContainer = document.getElementById("resultContainer");
+        var modalcontentstatus = document.getElementById("modal-content-status");
+        var startTime, endTime, elapsedSecond;
+
+        function startRequest() {
+            var callnumbers = document.getElementById("txtAPICallsToMake").value;
+            if (callnumbers) {
+                totalAPICallsToMake = callnumbers;
+            }
+            document.getElementById("modalWindowOverlay").classList.add('modal');
+            document.getElementById("modalWindowMsg").classList.remove('hide');
+            submitCalls(apiNumber);
+        }
+
+        function submitCalls(count) {
+            modalcontentstatus.innerHTML = 'Callback initiated for API number - ' + count;
+            startTime = new Date().getTime();
+            Visualforce.remoting.Manager.invokeAction(
+                '{!$RemoteAction.ContinuationDemoJSRemoting.callService}',
+                count,
+                handleResult
+            );
+        }
+
+        function handleResult(result, event) {
+            endTime = new Date().getTime();
+            elapsedSecond = (endTime - startTime) / 1000;
+            modalcontentstatus.innerHTML = 'Callback completed';
+            if (event.status) {
+                resultContainer.innerHTML = resultContainer.innerHTML + '<br /> Time Taken for API ' + apiNumber + ' : ' + elapsedSecond + ' sec , Response : ' + result;
+            }
+
+            if (apiNumber < totalAPICallsToMake) {
+                apiNumber++;
+                submitCalls(apiNumber);
+            } else {
+                cancelModal();
+            }
+        }
+
+        function cancelModal() {
+            document.getElementById("modalWindowOverlay").classList.remove('modal');
+            document.getElementById("modalWindowMsg").classList.add('hide');
+        }
+    </script>
+</apex:page>

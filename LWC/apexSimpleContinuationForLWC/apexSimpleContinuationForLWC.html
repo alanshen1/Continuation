@@ -1,0 +1,71 @@
+<template>
+  <div class="slds-card slds-p-around_large">
+    <div class="slds-var-m-around_medium">
+      <lightning-input name="input1" label="req repeat times" value={repeattimes} onchange={handleFormInput1Change}></lightning-input>
+      <lightning-input name="input2" label="server latency" value={latency} onchange={handleFormInput2Change}></lightning-input>
+      <lightning-input name="input3" label="the time to wait between two requests" value={waittime} onchange={handleFormInput3Change}></lightning-input>
+    </div>
+    <div>
+      <lightning-button icon-name="action:user_activation" label="request" variant="brand" onclick={requestProcess}>  
+      </lightning-button>
+    </div>
+    <div>
+      <lightning-card  title={resultlabel}>
+        <code>{result}</code>
+      </lightning-card>
+    </div>
+
+    <lightning-card  variant="Narrow"  title="All Data Recevied" icon-name="standard:account">
+      <template if:true={isLoading}>
+        <div>
+          {resultlabel}
+        </div>
+      </template>
+
+
+      <div>
+          <div class="slds-scrollable_x">
+            <table class="slds-table slds-table--header-fixed slds-table_cell-buffer slds-table_bordered">
+                <thead>
+                    <tr class="slds-line-height_reset">
+                        <th class="" scope="col">
+                          <div class="slds-truncate">No.</div>
+                        </th>
+                        <th class="" scope="col">
+                            <div class="slds-truncate">Product Id</div>
+                        </th>
+                        <th class="" scope="col">
+                            <div class="slds-truncate">Name</div>
+                        </th>
+                        <th class="" scope="col">
+                            <div class="slds-truncate">Category</div>
+                        </th>
+                        <th class="" scope="col">
+                          <div class="slds-truncate">Msrp</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template if:true={hasData}>
+                        <template for:each={dataList} for:item="rec">
+                            <tr key={rec.Id}>
+                              <td>{rec.no}</td>
+                              <td>{rec.id}</td>
+                              <td style="white-space: pre-wrap;">{rec.name}</td>
+                              <td style="white-space: pre-wrap;">{rec.category}</td>
+                              <td>{rec.msrp}</td>
+                            </tr>
+                        </template>
+                    </template>
+                    <template if:false={hasData}>
+                        <tr>
+                            <td colspan="2">{MSG_NODATA}</td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
+          </div>
+        </div>
+    </lightning-card>
+  </div>
+</template>
